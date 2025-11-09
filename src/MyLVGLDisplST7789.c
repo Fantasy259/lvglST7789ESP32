@@ -1,12 +1,14 @@
 /*
-    Erstellt 09.11.25 
+    Created 09.11.25 
     
-    ESP32 mit 240x320 Pixel st7789 Display am SPI Bus 
-    Grafikintervace lvgl 9.2 (Declariert in der idf_comonenten.yml) neuere Versionen Funktionieren derzeit nicht mit Platformio
-    ESP-IDF Verison v5.2.1 deklariert in platformio.ini (platform = espressif32@6.6.0) neuere Verison funktionieren aktuel nicht 
+    ESP32 with 240x320 pixel st7789 display on SPI bus 
+    Graphics interface lvgl 9.2 (declared in idf_comonenten.yml) Newer versions currently do not work with Platformio
+    ESP-IDF version v5.2.1 declared in platformio.ini (platform = espressif32@6.6.0) newer versions currently do not work 
 
-    Konfiguration der lvgl über build_flags = -D LV_CONF_PATH="${PROJECT_DIR}/include/lv_conf.h" in PLatformio.ini 
-    Die lv_config.h liegt im include Ordner. 
+    Configuration of lvgl via build_flags = -D LV_CONF_PATH="${PROJECT_DIR}/include/lv_conf.h" in PLatformio.ini 
+    The lv_config.h is located in the include folder. 
+
+Translated with DeepL.com (free version)
 */
 
 #include "MyLVGLDisplST7789.h"
@@ -27,8 +29,9 @@
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
 
-// ****  Einbinden der Dateien die mit EZZ Studio erstellt wurden https://www.envox.eu/studio/studio-introduction/
-// Im projekt sollte der ordner für lvgl nur mit lvgl angeben werden nicht mit lvgl/lvgl
+
+// ****  Include the files created with EZZ Studio https://www.envox.eu/studio/studio-introduction/
+// In the project, the folder for lvgl should only be specified with lvgl, not with lvgl/lvgl
 #include "ui/ui.h" 
 
 #define LCD_H_RES       240
@@ -36,7 +39,7 @@
 #define BUS_SPI1_POLL_TIMEOUT 0x1000U
 
 #define TFT_MOSI    25 //23
-#define TFT_SCLK    26 // 18
+#define TFT_SCLK    26 //18
 #define TFT_CS      33 // 0
 #define TFT_DC      32 // 2
 #define TFT_RST     16 // 4
@@ -50,11 +53,11 @@ static spi_device_handle_t spi;
 lv_display_t *lcd_disp;
 
 // Declaration Function 
-static void My_LVGL_Disp_start_lvgl_tick(void);     // Starten der Zeit lvgl 
-static void My_LVGL_Disp_lv_tick_cb(void *arg);     // lvgl Tick Zeit 
-static int32_t My_LVGL_Disp_lcd_io_SPI_init(void);  // SPI einrichten 
-static void My_LVGL_Disp_lcd_send_cmd(lv_display_t *disp, const uint8_t *cmd, size_t cmd_size, const uint8_t *param, size_t param_size);  // lvgl funktion zum senden von Befehle 
-static void My_LVGL_Disp_lcd_send_color(lv_display_t *disp, const uint8_t *cmd, size_t cmd_size, uint8_t *param, size_t param_size); // lvgl Funktion zum senden von Farben 
+static void My_LVGL_Disp_start_lvgl_tick(void);     // start time for lvgl 
+static void My_LVGL_Disp_lv_tick_cb(void *arg);     // lvgl Tick time 
+static int32_t My_LVGL_Disp_lcd_io_SPI_init(void);  // SPI init 
+static void My_LVGL_Disp_lcd_send_cmd(lv_display_t *disp, const uint8_t *cmd, size_t cmd_size, const uint8_t *param, size_t param_size);  // function for sending commands
+static void My_LVGL_Disp_lcd_send_color(lv_display_t *disp, const uint8_t *cmd, size_t cmd_size, uint8_t *param, size_t param_size); // lvgl Function for sending colors 
 void My_LVGL_Disp_Time_Handler(void *arg);
 
 void My_LVGL_Disp_main_Init()
@@ -67,15 +70,15 @@ void My_LVGL_Disp_main_Init()
     /* Initialize LCD SPI interface */
     My_LVGL_Disp_lcd_io_SPI_init();
 
-    // Zeitgeber für lvgl. Ohne die funktion bleibt LVGL stehen und es wird ein Watchdog ausgelöst vom LVGL 
+    // Timer for lvgl. Without this function, LVGL stops and a watchdog is triggered by LVGL. 
     My_LVGL_Disp_start_lvgl_tick(); 
     
-    /* Create the LVGL display object and the LCD display driver */
+    // Create the LVGL display object and the LCD display driver 
     lcd_disp = lv_st7789_create(LCD_H_RES, LCD_V_RES, LV_LCD_FLAG_NONE, My_LVGL_Disp_lcd_send_cmd, My_LVGL_Disp_lcd_send_color);
     lv_display_set_rotation(lcd_disp, LV_DISPLAY_ROTATION_0);
     lv_st7789_set_invert(lcd_disp, true);
     
-    /* Allocate draw buffers on the heap. In this example we use two partial buffers of 1/10th size of the screen */
+    // Allocate draw buffers on the heap. In this example we use two partial buffers of 1/10th size of the screen 
     lv_color_t * buf1 = NULL;
     lv_color_t * buf2 = NULL;
 
@@ -96,37 +99,37 @@ void My_LVGL_Disp_main_Init()
     lv_display_set_buffers(lcd_disp, buf1, buf2, buf_size, LV_DISPLAY_RENDER_MODE_PARTIAL);
 
    //ui_init(lcd_disp);
-   ui_init();           // Aufruf der mit EEZ Studio erzeugten Seite. 
+   ui_init();           // Call up the page created with EEZ Studio. 
 
-   xTaskCreate(My_LVGL_Disp_Time_Handler, "My_LVGL_Disp_Time_Handler", 4096, NULL, 5 ,NULL);  // Thread einschalten 
+   xTaskCreate(My_LVGL_Disp_Time_Handler, "My_LVGL_Disp_Time_Handler", 4096, NULL, 5 ,NULL);  //  Turn on thread 
 
 }
 
 // ***************************************************************************************
-// ***** worker für die lvgl 
+// ***** worker for the lvgl 
 // ***************************************************************************************
 void My_LVGL_Disp_Time_Handler(void *arg)
 {
     while(true)
     {
-                    /* The task running lv_timer_handler should have lower priority than that running `lv_tick_inc` */
+            // The task running lv_timer_handler should have lower priority than that running `lv_tick_inc` 
             lv_timer_handler();
-            /* raise the task priority of LVGL and/or reduce the handler period can improve the performance */
+            // raise the task priority of LVGL and/or reduce the handler period can improve the performance
             vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
 // ********************************************************************
-// **** Zeitgeber für die lvgl muss gestartet werden vor befor der Display erzeugt wird. 
-// **** Wird im 1ms Takt auferufen 
+// **** The timer for the lvgl must be started before the display is generated.
+// **** Called every 1 ms 
 // ********************************************************************
 static void My_LVGL_Disp_lv_tick_cb(void *arg) {
     lv_tick_inc(1);  // +1 ms
 }
 
 // ********************************************************************
-// **** Startet den Zeitgeber für lvgl 
-// **** Wird im einrichtenbereich aufgerufen 
+// **** Starts the timer for lvgl
+// **** Is called in the setup area 
 // ********************************************************************
 static void My_LVGL_Disp_start_lvgl_tick(void)
 {
@@ -142,11 +145,11 @@ static void My_LVGL_Disp_start_lvgl_tick(void)
 
 
 // ***************************************************************************
-// ****** Einrichten des SPI schnitstelle für die Datenübertragung an dens Display 
+// ****** Setting up the SPI interface for data transfer to the display 
 // ***************************************************************************
 static int32_t My_LVGL_Disp_lcd_io_SPI_init(void)
 {
-    // GPIOs funktion einstellen  
+    // Set GPIO function   
     gpio_config_t io_conf = {
         .mode = GPIO_MODE_OUTPUT,
         .pin_bit_mask = (1ULL << TFT_CS) | (1ULL << TFT_RST) | (1ULL << TFT_DC) ,
@@ -157,11 +160,11 @@ static int32_t My_LVGL_Disp_lcd_io_SPI_init(void)
 
     ESP_ERROR_CHECK(gpio_config(&io_conf));
 
-    // Reset Sequenz für den Dsiaply 
-    gpio_set_level(TFT_RST, 0);         // Reset aktiv
-    vTaskDelay(pdMS_TO_TICKS(20));      // mindestens 10µs, wir geben 20ms
-    gpio_set_level(TFT_RST, 1);         // Reset aus
-    vTaskDelay(pdMS_TO_TICKS(120));     // warten bis Controller bereit
+    // Reset sequence for the Dsiaply
+    gpio_set_level(TFT_RST, 0);         // Reset active
+    vTaskDelay(pdMS_TO_TICKS(20));      // at least 10µs, we give 20ms
+    gpio_set_level(TFT_RST, 1);         // Reset off
+    vTaskDelay(pdMS_TO_TICKS(120));     // wait until controller is ready
 
     ESP_LOGI(TAG, "Initialize SPI bus");
     spi_bus_config_t buscfg = {
@@ -188,15 +191,15 @@ static int32_t My_LVGL_Disp_lcd_io_SPI_init(void)
 
 
 // *************************************************************************************
-// ****** Route für das übertragen von Befehle vom lvgl an den Display 
-// ****** Wird aus dem lvgl selbst aufgerufn 
+// ****** Route for transferring commands from lvgl to the display
+// ****** Is called from lvgl itself
 // *************************************************************************************
 static void My_LVGL_Disp_lcd_send_cmd(lv_display_t *disp, const uint8_t *cmd, size_t cmd_size, const uint8_t *param, size_t param_size)
 {
   //   ESP_LOGI("ST7735", "send_CMD cmd=0x%02X, size cmd =%d , param = 0x%02x, size Param %d", cmd ? cmd[0] : 0, (int) cmd_size, param ? param[0] : 0, (int)param_size);
     esp_err_t ret;
 
-    // 1. Command senden (DC = 0)
+    // 1. Command send (DC = 0)
     gpio_set_level(TFT_DC, 0);
     spi_transaction_t t_cmd = {
         .length = cmd_size * 8,
@@ -206,7 +209,7 @@ static void My_LVGL_Disp_lcd_send_cmd(lv_display_t *disp, const uint8_t *cmd, si
   
     if (ret != ESP_OK) return;
 
-    // 2. Parameterdaten senden (falls vorhanden, DC = 1)
+    // Send parameter data (if available, DC = 1)
     if (param != NULL && param_size > 0) {
         gpio_set_level(TFT_DC, 1);
         spi_transaction_t t_data = {
@@ -221,13 +224,13 @@ static void My_LVGL_Disp_lcd_send_cmd(lv_display_t *disp, const uint8_t *cmd, si
 }
 
 // ***********************************************************************************************
-// **** Routine für das Übertragen der Bild Informationen an den Display Farbformat RGB565(16bit) 
-// **** Wird von lvgl selber aufgerufen 
+// **** Routine for transferring image information to the display color format RGB565(16bit) 
+// **** Called by lvgl itself 
 // ************************************************************************************************
 static void My_LVGL_Disp_lcd_send_color(lv_display_t *disp, const uint8_t *cmd, size_t cmd_size, uint8_t *param, size_t param_size)
 {
    esp_err_t ret;
-    // 1. Command schicken (z. B. 0x2C)
+    // 1. Command send (z. B. 0x2C)
     if (cmd != NULL && cmd_size > 0) {
         gpio_set_level(TFT_DC, 0);
         spi_transaction_t t_cmd = {
@@ -238,7 +241,7 @@ static void My_LVGL_Disp_lcd_send_color(lv_display_t *disp, const uint8_t *cmd, 
         if (ret != ESP_OK) return;
     }
 
-    // 2. Pixel-Daten (param)
+    // 2. Pixel-Data send (param)
     if (param != NULL && param_size > 0) {
         gpio_set_level(TFT_DC, 1);
         spi_transaction_t t_data = {
@@ -254,6 +257,8 @@ static void My_LVGL_Disp_lcd_send_color(lv_display_t *disp, const uint8_t *cmd, 
 }
 
 
+
+/************************************************************************************************************* */
 // Eigne erzeugen eine Display mit animation 
 /*
 static void anim_x_cb(void * var, int32_t v)
