@@ -1,0 +1,27 @@
+# --- PlatformIO & Build ---
+.pio/
+.cmake/
+build/
+dist/
+cmake-build-*/
+
+# --- ESP-IDF / Tools ---
+.espressif/
+idf_env.json
+sdkconfig.old
+# Falls du sdkconfig NICHT committen willst:
+# sdkconfig
+
+# --- IDF Component Manager ---
+managed_components/
+dependencies.lock-backup*
+
+# --- VS Code ---
+.vscode/
+# Wenn du bestimmte VS-Code-Dateien teilen willst, nimm sie explizit auf
+# (z.B. .vscode/extensions.json), sonst ignorieren.
+
+# --- OS/Editor ---
+.DS_Store
+Thumbs.db
+*.swp

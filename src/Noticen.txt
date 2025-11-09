@@ -1,0 +1,8 @@
+pio run -t menuconfig   önnen aus dem PatformIO cli
+
+Patitionstabelle in der platformio eintragen "board_build.partitions = partitions.csv"
+
+platform = espressif32@6.6.0
+
+
+
