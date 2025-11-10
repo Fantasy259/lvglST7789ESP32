@@ -1,5 +1,5 @@
-#ifndef MYWIFI_H_
-#define MYWIFI_H
+#ifndef MYLVGLSIPLST7789_H_
+#define MYLVGLSIPLST7789_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,4 +12,4 @@ void My_LVGL_Disp_main_Init();
 }
 #endif
 
-#endif  //MYWIFI_H_
+#endif  //MYLVGLSIPLST7789_H_
